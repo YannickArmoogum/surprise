@@ -60,13 +60,36 @@
     }
   }
 
-  /* fluid type helpers — scale to the phone container, clamped for large phones */
   .screen {
     position: absolute; inset: 0; z-index: 10;
     display: none; flex-direction: column;
     padding: max(52px, env(safe-area-inset-top)) 30px max(40px, env(safe-area-inset-bottom));
   }
   .screen.active { display: flex; animation: cardIn .45s ease both; }
+
+  /* ===== LANGUAGE GATE (shown first) ===== */
+  .lang-gate {
+    position: absolute; inset: 0; z-index: 60;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 34px;
+    padding: 40px 30px calc(40px + env(safe-area-inset-bottom));
+    background: radial-gradient(120% 80% at 50% 0%, #241a12 0%, #16120e 62%);
+    animation: cardIn .5s ease both;
+  }
+  .lang-gate.hidden { display: none; }
+  .lang-gate .brand { display: flex; flex-direction: column; align-items: center; gap: 18px; animation: dropIn .7s ease both; }
+  .lang-gate .prompt { font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--muted); text-align: center; }
+  .lang-gate .buttons { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 260px; animation: riseIn .7s .15s both; }
+  .lang-btn {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    background: transparent; color: var(--cream);
+    border: 1px solid rgba(239,233,223,.28); border-radius: 14px;
+    padding: 16px 20px; cursor: pointer; transition: .15s;
+    font-family: var(--serif); font-size: 22px; font-weight: 600;
+  }
+  .lang-btn:hover { border-color: var(--tan); background: rgba(217,140,95,.08); }
+  .lang-btn:active { transform: scale(.98); }
+  .lang-btn .tag { font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: var(--tan); font-weight: 700; }
 
   /* ===== TOP CHROME ===== */
   .topbar {
@@ -99,13 +122,13 @@
   .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: .28em; color: var(--muted); animation: riseIn .6s .1s both; }
   .cover h1 {
     font-family: var(--serif); font-weight: 600; line-height: .98; margin: 16px 0 0; letter-spacing: -.01em;
-    font-size: clamp(46px, 14.4cqw, 60px); animation: riseIn .7s .22s both;
+    font-size: clamp(42px, 13cqw, 60px); animation: riseIn .7s .22s both;
   }
   .cover h1 span { font-style: italic; color: var(--tan); }
-  .lede { max-width: 270px; margin: 20px auto 0; font-size: 13.5px; line-height: 1.55; color: #c9c0b3; animation: riseIn .7s .36s both; }
+  .lede { max-width: 280px; margin: 20px auto 0; font-size: 13.5px; line-height: 1.55; color: #c9c0b3; animation: riseIn .7s .36s both; }
   .cover .bot { display: flex; flex-direction: column; align-items: center; gap: 6px; animation: riseIn .7s .5s both; }
-  .tap-hint { font-family: var(--mono); font-size: 11px; letter-spacing: .3em; color: var(--cream); animation: pulseHint 1.8s ease-in-out infinite; }
-  .seat-note { font-size: 9px; letter-spacing: .22em; color: var(--dim); font-family: var(--mono); }
+  .tap-hint { font-family: var(--mono); font-size: 11px; letter-spacing: .3em; color: var(--cream); animation: pulseHint 1.8s ease-in-out infinite; text-align: center; }
+  .seat-note { font-size: 9px; letter-spacing: .22em; color: var(--dim); font-family: var(--mono); text-align: center; }
 
   /* ===== 1 · BOARDING PASS ===== */
   .pass { justify-content: center; padding-left: 22px; padding-right: 22px; background: var(--bg); }
@@ -138,7 +161,7 @@
   .board { justify-content: center; background: var(--tan); color: var(--bg); overflow: hidden; padding-left: 26px; padding-right: 26px; }
   .board .ring { position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; border: 1.5px solid rgba(22,18,14,.16); animation: spinSlow 26s linear infinite; }
   .board .gate { font-family: var(--mono); font-size: 11px; letter-spacing: .24em; animation: dropIn .5s both; }
-  .board h2 { font-family: var(--serif); font-weight: 700; font-size: clamp(52px, 16.4cqw, 68px); line-height: .9; margin: 14px 0 0; letter-spacing: -.02em; animation: riseIn .6s .12s both; }
+  .board h2 { font-family: var(--serif); font-weight: 700; font-size: clamp(48px, 15cqw, 68px); line-height: .9; margin: 14px 0 0; letter-spacing: -.02em; animation: riseIn .6s .12s both; }
   .board p { font-size: 15px; line-height: 1.5; max-width: 280px; margin: 22px 0 0; animation: riseIn .6s .28s both; }
   .board p strong { font-family: var(--mono); }
   .marquee { margin-top: 30px; overflow: hidden; white-space: nowrap; border-top: 1px solid rgba(22,18,14,.25); border-bottom: 1px solid rgba(22,18,14,.25); padding: 9px 0; animation: riseIn .6s .4s both; }
@@ -164,9 +187,9 @@
 
   /* ===== 4 · COUNTDOWN ===== */
   .count { align-items: center; justify-content: center; gap: 14px; padding: 40px; background: radial-gradient(100% 70% at 50% 50%, #241a12 0%, #16120e 70%); }
-  .count .top-l { font-family: var(--mono); font-size: 12px; letter-spacing: .34em; color: var(--tan); }
+  .count .top-l { font-family: var(--mono); font-size: 12px; letter-spacing: .34em; color: var(--tan); text-align: center; }
   .count .num { font-family: var(--serif); font-weight: 700; font-size: clamp(150px, 54cqw, 220px); line-height: 1; color: var(--cream); }
-  .count .bot-l { font-family: var(--mono); font-size: 11px; letter-spacing: .28em; color: var(--muted); }
+  .count .bot-l { font-family: var(--mono); font-size: 11px; letter-spacing: .28em; color: var(--muted); text-align: center; }
 
   /* ===== 5 · VIDEO ===== */
   .video { padding: 0; z-index: 20; background: #000; }
@@ -179,7 +202,7 @@
   .arrived { padding: 0; z-index: 20; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--bg); }
   .hero { position: relative; padding: max(74px, calc(env(safe-area-inset-top) + 40px)) 26px 44px; text-align: center; background: radial-gradient(120% 80% at 50% 0%, #241a12 0%, #16120e 60%); }
   .hero .eyebrow2 { font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--tan); animation: dropIn .6s both; }
-  .hero h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(54px, 17cqw, 70px); line-height: .92; margin: 14px 0 0; letter-spacing: -.02em; animation: popIn .7s .1s both; }
+  .hero h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(52px, 17cqw, 70px); line-height: .92; margin: 14px 0 0; letter-spacing: -.02em; animation: popIn .7s .1s both; }
   .hero .date { font-family: var(--mono); font-size: 13px; letter-spacing: .16em; color: var(--cream); margin-top: 14px; animation: riseIn .6s .3s both; }
   .hero p { max-width: 290px; margin: 18px auto 0; font-size: 14px; line-height: 1.55; color: #c9c0b3; animation: riseIn .6s .42s both; }
   .cta { display: flex; gap: 10px; justify-content: center; margin-top: 26px; flex-wrap: wrap; animation: riseIn .6s .54s both; }
@@ -256,146 +279,161 @@
       <div class="wordmark">Y &nbsp;&amp;&nbsp; R &nbsp; A I R W A Y S</div>
     </div>
     <div class="mid">
-      <div class="eyebrow">FLIGHT <span class="flight-code">YR·2003</span> · NOW BOARDING</div>
-      <h1>Boarding Pass<br><span>to&nbsp;Forever</span></h1>
-      <p class="lede">Yannick &amp; Reana request the pleasure of your company — somewhere near 35,000 feet.</p>
+      <div class="eyebrow" data-i18n-html="coverEyebrow">FLIGHT YR·2003 · NOW BOARDING</div>
+      <h1 data-i18n-html="coverTitle">Boarding Pass<br><span>to&nbsp;Forever</span></h1>
+      <p class="lede" data-i18n="coverLede">Yannick &amp; Reana request the pleasure of your company — somewhere near 35,000 feet.</p>
     </div>
     <div class="bot">
-      <div class="tap-hint">TAP TO CHECK IN →</div>
-      <div class="seat-note">SEAT: BESIDE US · GATE 20</div>
+      <div class="tap-hint" data-i18n="tapHint">TAP TO CHECK IN →</div>
+      <div class="seat-note" data-i18n="seatNote">SEAT: BESIDE US · GATE 20</div>
     </div>
   </section>
 
   <!-- 1 · BOARDING PASS -->
   <section class="screen pass" data-step="1">
-    <div class="prompt">YOUR TICKET IS READY —</div>
+    <div class="prompt" data-i18n="passPrompt">YOUR TICKET IS READY —</div>
     <div class="ticket">
-      <div class="ticket-head"><span>BOARDING PASS</span><span>Y&amp;R AIRWAYS</span></div>
+      <div class="ticket-head"><span data-i18n="passBoardingPass">BOARDING PASS</span><span>Y&amp;R AIRWAYS</span></div>
       <div class="ticket-body">
-        <div class="t-label">PASSENGER</div>
-        <div class="passenger">Our Favourite People</div>
+        <div class="t-label" data-i18n="passPassengerLabel">PASSENGER</div>
+        <div class="passenger" data-i18n="passPassenger">Our Favourite People</div>
         <div class="t-row r1">
-          <div class="t-cell"><div class="t-lab">FLIGHT</div><div class="t-val flight-code">YR·20-03</div></div>
-          <div class="t-cell"><div class="t-lab">DATE</div><div class="t-val">20 MAR 2027</div></div>
-          <div class="t-cell"><div class="t-lab">GATE</div><div class="t-val">20</div></div>
+          <div class="t-cell"><div class="t-lab" data-i18n="labFlight">FLIGHT</div><div class="t-val flight-code">YR·2003</div></div>
+          <div class="t-cell"><div class="t-lab" data-i18n="labDate">DATE</div><div class="t-val">20 MAR 2027</div></div>
+          <div class="t-cell"><div class="t-lab" data-i18n="labGate">GATE</div><div class="t-val">20</div></div>
         </div>
         <div class="t-row r2">
-          <div class="t-cell"><div class="t-lab">CLASS</div><div class="t-val">FIRST · FOREVER</div></div>
-          <div class="t-cell"><div class="t-lab">SEAT</div><div class="t-val">BESIDE US</div></div>
+          <div class="t-cell"><div class="t-lab" data-i18n="labClass">CLASS</div><div class="t-val" data-i18n="valClass">FIRST · FOREVER</div></div>
+          <div class="t-cell"><div class="t-lab" data-i18n="labSeat">SEAT</div><div class="t-val" data-i18n="valSeat">BESIDE US</div></div>
         </div>
       </div>
       <div class="perf"></div>
       <div class="ticket-foot">
         <div>
-          <div class="t-label">DESTINATION</div>
+          <div class="t-label" data-i18n="labDestination">DESTINATION</div>
           <div class="dest-dots">• • • • •</div>
         </div>
         <div class="barcode" id="barcode"></div>
       </div>
     </div>
-    <div class="withheld">DESTINATION WITHHELD — FOR NOW</div>
+    <div class="withheld" data-i18n="withheld">DESTINATION WITHHELD — FOR NOW</div>
   </section>
 
   <!-- 2 · NOW BOARDING -->
   <section class="screen board" data-step="2">
     <div class="ring"></div>
-    <div class="gate">● GATE 20 · FINAL CALL</div>
-    <h2>Now<br>Boarding</h2>
-    <p>Flight <strong class="flight-code">YR·2003</strong> to <strong style="letter-spacing:.1em;">✱ ✱ ✱ ✱ ✱</strong> is boarding. All rows, all hearts — please have your bags and your best outfits ready.</p>
-    <div class="marquee"><span>FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · </span></div>
+    <div class="gate" data-i18n="boardGate">● GATE 20 · FINAL CALL</div>
+    <h2 data-i18n-html="boardTitle">Now<br>Boarding</h2>
+    <p data-i18n-html="boardBody">Flight <strong>YR·2003</strong> to <strong style="letter-spacing:.1em;">✱ ✱ ✱ ✱ ✱</strong> is boarding. All rows, all hearts — please have your bags and your best outfits ready.</p>
+    <div class="marquee"><span data-i18n="marquee">FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · </span></div>
   </section>
 
   <!-- 3 · CITIES -->
   <section class="screen cities" data-step="3">
-    <div class="head">DEPARTURE&nbsp;&nbsp;/&nbsp;&nbsp;ARRIVAL</div>
+    <div class="head" data-i18n="citiesHead">DEPARTURE&nbsp;&nbsp;/&nbsp;&nbsp;ARRIVAL</div>
     <div class="route">
       <div style="text-align:left;">
         <div class="code">HOM</div>
-        <div class="sub">HOME · YOU</div>
+        <div class="sub" data-i18n="subHome">HOME · YOU</div>
       </div>
       <div class="mid"><div class="l"></div><span class="plane">✈</span><div class="r"></div></div>
       <div style="text-align:right;">
         <div class="code dest">???</div>
-        <div class="sub">CLASSIFIED</div>
+        <div class="sub" data-i18n="subClassified">CLASSIFIED</div>
       </div>
     </div>
     <div class="facts">
-      <div class="fact"><div class="k">TIMEZONE</div><div class="v lg">GMT +4</div></div>
-      <div class="fact"><div class="k">FORECAST</div><div class="v lg">28°C ☀</div></div>
-      <div class="fact"><div class="k">TERRAIN</div><div class="v sm">Indian Ocean</div></div>
-      <div class="fact"><div class="k">PACK</div><div class="v sm">Leave the coats</div></div>
+      <div class="fact"><div class="k" data-i18n="factTimezone">TIMEZONE</div><div class="v lg">GMT +4</div></div>
+      <div class="fact"><div class="k" data-i18n="factForecast">FORECAST</div><div class="v lg">28°C ☀</div></div>
+      <div class="fact"><div class="k" data-i18n="factTerrain">TERRAIN</div><div class="v sm" data-i18n="valTerrain">Indian Ocean</div></div>
+      <div class="fact"><div class="k" data-i18n="factPack">PACK</div><div class="v sm" data-i18n="valPack">Leave the coats</div></div>
     </div>
-    <p class="guess">Any guesses where we're taking you?</p>
+    <p class="guess" data-i18n="guess">Any guesses where we're taking you?</p>
   </section>
 
   <!-- 4 · COUNTDOWN -->
   <section class="screen count" data-step="4">
-    <div class="top-l">CLEARED FOR TAKEOFF</div>
+    <div class="top-l" data-i18n="countTop">CLEARED FOR TAKEOFF</div>
     <div class="num" id="countNum">3</div>
-    <div class="bot-l">FASTEN SEATBELTS</div>
+    <div class="bot-l" data-i18n="countBot">FASTEN SEATBELTS</div>
   </section>
 
   <!-- 5 · VIDEO -->
   <section class="screen video" data-step="5">
     <video id="weddingVideo" src="uploads/wedding_video_lower_res.mp4" playsinline preload="auto"></video>
-    <button class="skip" id="skipBtn">SKIP →</button>
-    <button class="unmute" id="unmuteBtn">🔊 TAP FOR SOUND</button>
+    <button class="skip" id="skipBtn" data-i18n="skip">SKIP →</button>
+    <button class="unmute" id="unmuteBtn" data-i18n="unmute">🔊 TAP FOR SOUND</button>
   </section>
 
   <!-- 6 · ARRIVED -->
   <section class="screen arrived" data-step="6">
     <div class="hero">
-      <div class="eyebrow2">✦ WELCOME TO YOUR DESTINATION</div>
+      <div class="eyebrow2" data-i18n="heroEyebrow">✦ WELCOME TO YOUR DESTINATION</div>
       <h1>Mauritius</h1>
       <div class="date">20 · 03 · 2027</div>
-      <p>Yannick &amp; Reana are getting married on the island — and Flight <span class="flight-code">YR·2003</span> isn't complete without you on board.</p>
+      <p data-i18n-html="heroBody">Yannick &amp; Reana are getting married on the island — and Flight YR·2003 isn't complete without you on board.</p>
       <div class="cta">
-        <a class="btn-fill" id="icsLink" download="YR2003-Mauritius.ics" href="#">＋ ADD TO CALENDAR</a>
+        <a class="btn-fill" id="icsLink" download="YR2003-Mauritius.ics" href="#" data-i18n="btnCalendar">＋ ADD TO CALENDAR</a>
         <a class="btn-line" href="#rsvp">RSVP</a>
       </div>
     </div>
 
     <div class="itin">
-      <div class="section-lab">IN-FLIGHT ITINERARY</div>
-      <div class="itin-row"><div class="d">18 MAR</div><div><div class="t">Arrivals &amp; Sundowners</div><div class="s">Land, unwind, first drinks by the water.</div></div></div>
-      <div class="itin-row"><div class="d">20 MAR</div><div><div class="t">The Wedding · 16:00</div><div class="s">Beachside ceremony, then dinner &amp; dancing.</div></div></div>
-      <div class="itin-row"><div class="d">21 MAR</div><div><div class="t">Recovery Brunch</div><div class="s">A slow, happy landing before you fly home.</div></div></div>
+      <div class="section-lab" data-i18n="itinLab">IN-FLIGHT ITINERARY</div>
+      <div class="itin-row"><div class="d">18 MAR</div><div><div class="t" data-i18n="itin1Title">Arrivals &amp; Sundowners</div><div class="s" data-i18n="itin1Sub">Land, unwind, first drinks by the water.</div></div></div>
+      <div class="itin-row"><div class="d">20 MAR</div><div><div class="t" data-i18n="itin2Title">The Wedding · 16:00</div><div class="s" data-i18n="itin2Sub">Beachside ceremony, then dinner &amp; dancing.</div></div></div>
+      <div class="itin-row"><div class="d">21 MAR</div><div><div class="t" data-i18n="itin3Title">Recovery Brunch</div><div class="s" data-i18n="itin3Sub">A slow, happy landing before you fly home.</div></div></div>
     </div>
 
     <div class="rsvp" id="rsvp">
-      <div class="section-lab">CONFIRM YOUR SEAT</div>
+      <div class="section-lab" data-i18n="rsvpLab">CONFIRM YOUR SEAT</div>
       <div id="rsvpDone" class="rsvp-done" style="display:none;">
         <div class="glass">🥂</div>
-        <div class="h">You're checked in!</div>
-        <p>We can't wait to see you in Mauritius. Details for Flight <span class="flight-code">YR·2003</span> are on their way.</p>
+        <div class="h" data-i18n="doneTitle">You're checked in!</div>
+        <p data-i18n-html="doneBody">We can't wait to see you in Mauritius. Details for Flight YR·2003 are on their way.</p>
       </div>
       <form id="rsvpForm">
-        <input id="rsvpName" placeholder="Full name" autocomplete="name" />
+        <input id="rsvpName" data-i18n-ph="phName" placeholder="Full name" autocomplete="name" />
         <div class="seg">
-          <button type="button" data-att="yes">Yes, I'll fly ✈</button>
-          <button type="button" data-att="no">Can't make it</button>
+          <button type="button" data-att="yes" data-i18n="attYes">Yes, I'll fly ✈</button>
+          <button type="button" data-att="no" data-i18n="attNo">Can't make it</button>
         </div>
         <div>
-          <div class="plus-lab">BRINGING A PLUS ONE?</div>
+          <div class="plus-lab" data-i18n="plusLab">BRINGING A PLUS ONE?</div>
           <div class="seg">
-            <button type="button" data-plus="solo">Just me</button>
-            <button type="button" data-plus="plus">Me + 1 ✦</button>
+            <button type="button" data-plus="solo" data-i18n="plusSolo">Just me</button>
+            <button type="button" data-plus="plus" data-i18n="plusOne">Me + 1 ✦</button>
           </div>
+          <input id="plusOneName" data-i18n-ph="phPlusName" placeholder="Name of your +1" autocomplete="off" style="margin-top:10px;display:none;" />
         </div>
-        <textarea id="rsvpMsg" placeholder="A note for the couple (optional)" rows="3"></textarea>
-        <button type="submit" class="submit" id="rsvpSubmit">CONFIRM MY SEAT</button>
+        <textarea id="rsvpMsg" data-i18n-ph="phMsg" placeholder="A note for the couple (optional)" rows="3"></textarea>
+        <button type="submit" class="submit" id="rsvpSubmit" data-i18n="submit">CONFIRM MY SEAT</button>
         <div class="rsvp-msg" id="rsvpErr"></div>
       </form>
     </div>
 
     <div class="foot">
       <div class="fl">Y&amp;R AIRWAYS · <span class="flight-code">YR·2003</span> · MAURITIUS 2027</div>
-      <a href="#" id="replayLink">↺ REPLAY BOARDING</a>
+      <a href="#" id="replayLink" data-i18n="replay">↺ REPLAY BOARDING</a>
     </div>
   </section>
 
   <!-- TAP NAV -->
   <div class="tap-layer" id="tapLayer"></div>
+
+  <!-- LANGUAGE GATE (first thing shown) -->
+  <div class="lang-gate" id="langGate">
+    <div class="brand">
+      <div class="badge">YR</div>
+      <div class="wordmark">Y &nbsp;&amp;&nbsp; R &nbsp; A I R W A Y S</div>
+    </div>
+    <div class="prompt">SELECT LANGUAGE · ZGJIDHNI GJUHËN</div>
+    <div class="buttons">
+      <button class="lang-btn" data-lang="en">English <span class="tag">EN</span></button>
+      <button class="lang-btn" data-lang="sq">Shqip <span class="tag">SQ</span></button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -405,20 +443,141 @@
   var FLIGHT_CODE = 'YR·2003';
   var PACE = 1; // Relaxed 1.4 · Standard 1 · Snappy 0.7
 
+  // ── Where RSVP submissions are sent ──────────────────────────────────────
+  // Locally (npm start) they go to the bundled Node + SQLite server so you keep
+  // the database + /admin page. On the published GitHub Pages site there is no
+  // server, so they go to Formspree instead.
+  //
+  // 1. Create a free form at https://formspree.io  →  copy its endpoint,
+  //    which looks like  https://formspree.io/f/abcdwxyz
+  // 2. Paste that full URL below, replacing YOUR_FORM_ID.
+  var RSVP_LOCAL  = '/api/rsvp';
+  var RSVP_REMOTE = 'https://formspree.io/f/YOUR_FORM_ID';
+  var IS_LOCAL = ['localhost', '127.0.0.1', ''].indexOf(location.hostname) !== -1;
+  var RSVP_ENDPOINT = IS_LOCAL ? RSVP_LOCAL : RSVP_REMOTE;
+
+  // ===== i18n dictionaries =====
+  var I18N = {
+    en: {
+      coverEyebrow: 'FLIGHT YR·2003 · NOW BOARDING',
+      coverTitle: 'Boarding Pass<br><span>to&nbsp;Forever</span>',
+      coverLede: 'Yannick & Reana request the pleasure of your company — somewhere near 35,000 feet.',
+      tapHint: 'TAP TO CHECK IN →',
+      seatNote: 'SEAT: BESIDE US · GATE 20',
+      passPrompt: 'YOUR TICKET IS READY —',
+      passBoardingPass: 'BOARDING PASS',
+      passPassengerLabel: 'PASSENGER',
+      passPassenger: 'Our Favourite People',
+      labFlight: 'FLIGHT', labDate: 'DATE', labGate: 'GATE', labClass: 'CLASS', labSeat: 'SEAT', labDestination: 'DESTINATION',
+      valClass: 'FIRST · FOREVER', valSeat: 'BESIDE US',
+      withheld: 'DESTINATION WITHHELD — FOR NOW',
+      boardGate: '● GATE 20 · FINAL CALL',
+      boardTitle: 'Now<br>Boarding',
+      boardBody: 'Flight <strong>YR·2003</strong> to <strong style="letter-spacing:.1em;">✱ ✱ ✱ ✱ ✱</strong> is boarding. All rows, all hearts — please have your bags and your best outfits ready.',
+      marquee: 'FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · ',
+      citiesHead: 'DEPARTURE  /  ARRIVAL',
+      subHome: 'HOME · YOU', subClassified: 'CLASSIFIED',
+      factTimezone: 'TIMEZONE', factForecast: 'FORECAST', factTerrain: 'TERRAIN', factPack: 'PACK',
+      valTerrain: 'Indian Ocean', valPack: 'Leave the coats',
+      guess: "Any guesses where we're taking you?",
+      countTop: 'CLEARED FOR TAKEOFF', countBot: 'FASTEN SEATBELTS',
+      skip: 'SKIP →', unmute: '🔊 TAP FOR SOUND',
+      heroEyebrow: '✦ WELCOME TO YOUR DESTINATION',
+      heroBody: "Yannick & Reana are getting married on the island — and Flight YR·2003 isn't complete without you on board.",
+      btnCalendar: '＋ ADD TO CALENDAR',
+      itinLab: 'IN-FLIGHT ITINERARY',
+      itin1Title: 'Arrivals & Sundowners', itin1Sub: 'Land, unwind, first drinks by the water.',
+      itin2Title: 'The Wedding · 16:00', itin2Sub: 'Beachside ceremony, then dinner & dancing.',
+      itin3Title: 'Recovery Brunch', itin3Sub: 'A slow, happy landing before you fly home.',
+      rsvpLab: 'CONFIRM YOUR SEAT',
+      doneTitle: "You're checked in!",
+      doneBody: "We can't wait to see you in Mauritius. Details for Flight YR·2003 are on their way.",
+      phName: 'Full name', attYes: "Yes, I'll fly ✈", attNo: "Can't make it",
+      plusLab: 'BRINGING A PLUS ONE?', plusSolo: 'Just me', plusOne: 'Me + 1 ✦',
+      phPlusName: "Name of your +1",
+      phMsg: 'A note for the couple (optional)', submit: 'CONFIRM MY SEAT',
+      replay: '↺ REPLAY BOARDING',
+      errName: 'Please enter your name.', confirming: 'Confirming your seat…',
+      genericErr: 'Something went wrong.', submitErr: 'Could not submit. Please try again.'
+    },
+    sq: {
+      coverEyebrow: 'FLUTURIMI YR·2003 · HIPJA PO FILLON',
+      coverTitle: 'Biletë Hipjeje<br><span>drejt&nbsp;Përjetësisë</span>',
+      coverLede: 'Yannick & Reana ju ftojnë me kënaqësi të jeni pjesë e ditës së tyre — diku pranë 35,000 këmbëve lartësi.',
+      tapHint: 'PREKNI PËR CHECK-IN →',
+      seatNote: 'ULËSE: PRANË NESH · PORTA 20',
+      passPrompt: 'BILETA JUAJ ËSHTË GATI —',
+      passBoardingPass: 'BILETË HIPJEJE',
+      passPassengerLabel: 'PASAGJERI',
+      passPassenger: 'Njerëzit Tanë të Preferuar',
+      labFlight: 'FLUTURIMI', labDate: 'DATA', labGate: 'PORTA', labClass: 'KLASA', labSeat: 'ULËSJA', labDestination: 'DESTINACIONI',
+      valClass: 'E PARË · PËRGJITHMONË', valSeat: 'PRANË NESH',
+      withheld: 'DESTINACIONI I FSHEHUR — PËR TANI',
+      boardGate: '● PORTA 20 · THIRRJA E FUNDIT',
+      boardTitle: 'Tani<br>Duke Hipur',
+      boardBody: 'Fluturimi <strong>YR·2003</strong> drejt <strong style="letter-spacing:.1em;">✱ ✱ ✱ ✱ ✱</strong> po niset. Të gjitha rreshtat, të gjitha zemrat — përgatitni valixhet dhe veshjet tuaja më të bukura.',
+      marquee: 'THIRRJA E FUNDIT · RUANI DATËN · THIRRJA E FUNDIT · RUANI DATËN · THIRRJA E FUNDIT · RUANI DATËN · THIRRJA E FUNDIT · RUANI DATËN · ',
+      citiesHead: 'NISJA  /  MBËRRITJA',
+      subHome: 'SHTËPIA · JU', subClassified: 'SEKRET',
+      factTimezone: 'ZONA ORARE', factForecast: 'MOTI', factTerrain: 'TERRENI', factPack: 'VALIXHET',
+      valTerrain: 'Oqeani Indian', valPack: 'Lëreni palltot',
+      guess: 'Ka ndonjë hamendje se ku po ju çojmë?',
+      countTop: 'GATI PËR NGRITJE', countBot: 'LIDHNI RRIPAT',
+      skip: 'KAPËRCE →', unmute: '🔊 PREKNI PËR ZË',
+      heroEyebrow: '✦ MIRË SE VINI NË DESTINACIONIN TUAJ',
+      heroBody: 'Yannick & Reana po martohen në ishull — dhe Fluturimi YR·2003 nuk është i plotë pa ju në bord.',
+      btnCalendar: '＋ SHTO NË KALENDAR',
+      itinLab: 'ITINERARI I FLUTURIMIT',
+      itin1Title: 'Mbërritjet & Pijet e Mbrëmjes', itin1Sub: 'Zbritni, çlodhuni, pijet e para pranë ujit.',
+      itin2Title: 'Dasma · 16:00', itin2Sub: 'Ceremoni buzë detit, pastaj darkë & valle.',
+      itin3Title: 'Brunch Rikuperimi', itin3Sub: 'Një zbritje e ngadaltë e gëzuar para se të ktheheni në shtëpi.',
+      rsvpLab: 'KONFIRMONI ULËSEN TUAJ',
+      doneTitle: 'Jeni regjistruar!',
+      doneBody: "Mezi presim t'ju shohim në Mauritius. Detajet për Fluturimin YR·2003 po vijnë së shpejti.",
+      phName: 'Emri i plotë', attYes: 'Po, do të fluturoj ✈', attNo: 'Nuk mund të vij',
+      plusLab: 'PO SILLNI DIKË ME VETE?', plusSolo: 'Vetëm unë', plusOne: 'Unë + 1 ✦',
+      phPlusName: 'Emri i personit +1',
+      phMsg: 'Një shënim për çiftin (opsionale)', submit: 'KONFIRMO ULËSEN TIME',
+      replay: '↺ RIPËRSËRIT HIPJEN',
+      errName: 'Ju lutem shkruani emrin tuaj.', confirming: 'Duke konfirmuar ulësen…',
+      genericErr: 'Diçka shkoi keq.', submitErr: 'Nuk u dërgua. Provoni përsëri.'
+    }
+  };
+
+  var currentLang = 'en';
+  function qsa(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || ''; }
+
+  function applyLang(lang) {
+    var dict = I18N[lang]; if (!dict) return;
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    qsa('[data-i18n]').forEach(function (el) {
+      var k = el.getAttribute('data-i18n'); if (dict[k] != null) el.textContent = dict[k];
+    });
+    qsa('[data-i18n-html]').forEach(function (el) {
+      var k = el.getAttribute('data-i18n-html'); if (dict[k] != null) el.innerHTML = dict[k];
+    });
+    qsa('[data-i18n-ph]').forEach(function (el) {
+      var k = el.getAttribute('data-i18n-ph'); if (dict[k] != null) el.setAttribute('placeholder', dict[k]);
+    });
+  }
+
+  // ===== element refs =====
   var phone = document.getElementById('phone');
   var topbar = document.getElementById('topbar');
   var tapLayer = document.getElementById('tapLayer');
+  var langGate = document.getElementById('langGate');
   var screens = {};
-  Array.prototype.forEach.call(document.querySelectorAll('.screen'), function (el) {
-    screens[el.getAttribute('data-step')] = el;
-  });
+  qsa('.screen').forEach(function (el) { screens[el.getAttribute('data-step')] = el; });
   var bars = [0,1,2,3].map(function (i) { return document.getElementById('bar' + i); });
   var countNum = document.getElementById('countNum');
   var video = document.getElementById('weddingVideo');
   var unmuteBtn = document.getElementById('unmuteBtn');
 
-  // fill flight code everywhere
-  Array.prototype.forEach.call(document.querySelectorAll('.flight-code'), function (el) { el.textContent = FLIGHT_CODE; });
+  function fillFlightCodes() {
+    qsa('.flight-code').forEach(function (el) { el.textContent = FLIGHT_CODE; });
+  }
 
   // build barcode (varied widths, matching the mock)
   (function () {
@@ -554,8 +713,8 @@
   })();
 
   // ---- RSVP ----
-  var attBtns = document.querySelectorAll('.seg button[data-att]');
-  var plusBtns = document.querySelectorAll('.seg button[data-plus]');
+  var attBtns = qsa('.seg button[data-att]');
+  var plusBtns = qsa('.seg button[data-plus]');
   attBtns.forEach(function (b) {
     b.addEventListener('click', function () {
       state.attending = b.getAttribute('data-att');
@@ -565,10 +724,13 @@
       });
     });
   });
+  var plusNameInput = document.getElementById('plusOneName');
   plusBtns.forEach(function (b) {
     b.addEventListener('click', function () {
       state.plusOne = b.getAttribute('data-plus') === 'plus';
       plusBtns.forEach(function (x) { x.classList.toggle('on-tan', x === b); });
+      plusNameInput.style.display = state.plusOne ? 'block' : 'none';
+      if (!state.plusOne) plusNameInput.value = '';
     });
   });
 
@@ -578,28 +740,30 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var name = document.getElementById('rsvpName').value.trim();
-    if (!name) { errEl.textContent = 'Please enter your name.'; errEl.className = 'rsvp-msg err'; return; }
+    if (!name) { errEl.textContent = t('errName'); errEl.className = 'rsvp-msg err'; return; }
     var payload = {
       name: name,
       attending: state.attending === 'no' ? 'no' : 'yes',
       guests: state.plusOne ? 2 : 1,
+      plusOneName: state.plusOne ? plusNameInput.value.trim() : '',
       message: document.getElementById('rsvpMsg').value.trim(),
+      lang: currentLang,
       meal: '', email: ''
     };
     submitBtn.disabled = true;
-    errEl.textContent = 'Confirming your seat…'; errEl.className = 'rsvp-msg';
-    fetch('/api/rsvp', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+    errEl.textContent = t('confirming'); errEl.className = 'rsvp-msg';
+    fetch(RSVP_ENDPOINT, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload)
+    }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }, function () { return { ok: r.ok, d: {} }; }); })
       .then(function (res) {
-        if (!res.ok) throw new Error(res.d && res.d.error || 'Something went wrong.');
+        if (!res.ok) throw new Error(res.d && res.d.error || t('genericErr'));
         state.done = true;
         form.style.display = 'none';
         document.getElementById('rsvpDone').style.display = 'block';
       })
       .catch(function (err) {
         submitBtn.disabled = false;
-        errEl.textContent = err.message || 'Could not submit. Please try again.';
+        errEl.textContent = err.message || t('submitErr');
         errEl.className = 'rsvp-msg err';
       });
   });
@@ -612,7 +776,17 @@
     phone.scrollTop = 0;
   });
 
-  // start
+  // ---- language gate ----
+  qsa('#langGate [data-lang]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      applyLang(b.getAttribute('data-lang'));
+      langGate.classList.add('hidden');
+    });
+  });
+
+  // ===== init =====
+  fillFlightCodes();
+  applyLang('en'); // default underneath the gate until a choice is made
   render();
 })();
 </script>

@@ -21,13 +21,20 @@ db.exec(`
     attending  TEXT NOT NULL DEFAULT 'yes',
     meal       TEXT,
     message    TEXT,
+    lang       TEXT,
+    plus_one_name TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);
 
+// Add columns to databases created before they existed (idempotent).
+const cols = db.prepare(`PRAGMA table_info(rsvps)`).all().map((c) => c.name);
+if (!cols.includes('lang')) db.exec(`ALTER TABLE rsvps ADD COLUMN lang TEXT`);
+if (!cols.includes('plus_one_name')) db.exec(`ALTER TABLE rsvps ADD COLUMN plus_one_name TEXT`);
+
 const insertRsvp = db.prepare(`
-  INSERT INTO rsvps (name, email, guests, attending, meal, message)
-  VALUES (@name, @email, @guests, @attending, @meal, @message)
+  INSERT INTO rsvps (name, email, guests, attending, meal, message, lang, plus_one_name)
+  VALUES (@name, @email, @guests, @attending, @meal, @message, @lang, @plus_one_name)
 `);
 const allRsvps = db.prepare(`SELECT * FROM rsvps ORDER BY created_at DESC`);
 
@@ -43,7 +50,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 
 // Serve the invitation at /
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'Boarding Pass to Forever.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // RSVP submission
@@ -57,6 +64,11 @@ app.post('/api/rsvp', (req, res) => {
   if (guests > 20) guests = 20;
 
   const attending = b.attending === 'no' ? 'no' : 'yes';
+  const lang = b.lang === 'sq' ? 'sq' : (b.lang === 'en' ? 'en' : null);
+  // Only keep a +1 name when the party is actually 2.
+  const plusOneName = guests > 1
+    ? ((b.plusOneName || '').toString().trim().slice(0, 200) || null)
+    : null;
 
   try {
     const info = insertRsvp.run({
@@ -65,7 +77,9 @@ app.post('/api/rsvp', (req, res) => {
       guests,
       attending,
       meal: (b.meal || '').toString().trim().slice(0, 100) || null,
-      message: (b.message || '').toString().trim().slice(0, 2000) || null
+      message: (b.message || '').toString().trim().slice(0, 2000) || null,
+      lang,
+      plus_one_name: plusOneName
     });
     return res.json({ ok: true, id: info.lastInsertRowid });
   } catch (err) {
@@ -98,13 +112,13 @@ app.get('/admin', requireAuth, (req, res) => {
   const totalGuests = yes.reduce((n, r) => n + (r.guests || 0), 0);
   const noCount = rows.filter(r => r.attending === 'no').length;
 
+  const langName = { en: 'English', sq: 'Shqip' };
   const tableRows = rows.map(r => `
     <tr class="${r.attending === 'no' ? 'declined' : ''}">
       <td>${esc(r.name)}</td>
       <td><span class="pill ${r.attending}">${r.attending === 'yes' ? 'Attending' : 'Declined'}</span></td>
-      <td class="num">${esc(r.guests)}</td>
-      <td>${esc(r.meal) || '—'}</td>
-      <td>${esc(r.email) || '—'}</td>
+      <td class="num">${esc(r.guests)}${r.plus_one_name ? ` <span class="plusname">+ ${esc(r.plus_one_name)}</span>` : ''}</td>
+      <td>${esc(langName[r.lang] || '—')}</td>
       <td>${esc(r.message) || ''}</td>
       <td class="date">${esc(r.created_at)}</td>
     </tr>`).join('');
@@ -131,7 +145,8 @@ app.get('/admin', requireAuth, (req, res) => {
   th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #eee; font-size: 14px; vertical-align: top; }
   th { background: #faf6ee; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #a8842f; }
   tr.declined { opacity: .6; }
-  td.num, td.date { white-space: nowrap; }
+  td.date { white-space: nowrap; }
+  .plusname { color: #a8842f; font-size: 12px; }
   td.date { color: #9aa6b0; font-size: 12px; }
   .pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; letter-spacing: .04em; }
   .pill.yes { background: #dff1e4; color: #2f7d4f; }
@@ -149,7 +164,7 @@ app.get('/admin', requireAuth, (req, res) => {
   </div>
   <div class="bar"><a class="btn" href="/admin/export.csv">Download CSV</a></div>
   ${rows.length ? `<table>
-    <thead><tr><th>Name</th><th>Status</th><th>Party</th><th>Meal</th><th>Email</th><th>Message</th><th>Received</th></tr></thead>
+    <thead><tr><th>Name</th><th>Status</th><th>Party</th><th>Language</th><th>Message</th><th>Received</th></tr></thead>
     <tbody>${tableRows}</tbody></table>`
     : `<div class="empty">No RSVPs yet.</div>`}
 </div></body></html>`);
@@ -157,7 +172,7 @@ app.get('/admin', requireAuth, (req, res) => {
 
 app.get('/admin/export.csv', requireAuth, (req, res) => {
   const rows = allRsvps.all();
-  const headers = ['id', 'name', 'email', 'guests', 'attending', 'meal', 'message', 'created_at'];
+  const headers = ['id', 'name', 'guests', 'plus_one_name', 'attending', 'lang', 'message', 'email', 'meal', 'created_at'];
   const escCsv = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
   const lines = [headers.join(',')];
   for (const r of rows) lines.push(headers.map(h => escCsv(r[h])).join(','));

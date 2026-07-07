@@ -20,6 +20,15 @@ Then open:
 - **Invitation:** http://localhost:3000/
 - **Admin (who RSVP'd):** http://localhost:3000/admin
 
+## Languages
+
+The very first screen is a language gate with two buttons — **English** and **Shqip
+(Albanian)**. Choosing one translates the entire invitation (every screen, the RSVP
+form, and its messages). To edit or add wording, see the `I18N` dictionary near the top
+of the `<script>` in `index.html` — each language is one object of
+`key: 'text'` pairs. The guest's chosen language is saved with their RSVP and shown in
+the admin table.
+
 ## Responsive
 
 The invitation fills the whole viewport and is fluid from **Samsung's 360 px-wide
@@ -51,7 +60,7 @@ Every RSVP is stored in **`rsvps.db`** (SQLite). The form captures name, attendi
 
 ## Files
 
-- `Boarding Pass to Forever.html` — the invitation (vanilla HTML/CSS/JS recreation of the design).
+- `index.html` — the invitation (vanilla HTML/CSS/JS recreation of the design).
 - `server.js` — Express server: serves the page, the `/api/rsvp` endpoint, `/admin`, and the video.
 - `uploads/wedding_video_lower_res.mp4` — the reveal video (served with HTTP range support).
 - `rsvps.db` — SQLite database (git-ignored, created on first run).
