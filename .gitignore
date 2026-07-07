@@ -1,0 +1,4 @@
+node_modules/
+rsvps.db
+rsvps.db-shm
+rsvps.db-wal

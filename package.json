@@ -1,0 +1,14 @@
+{
+  "name": "boarding-pass-to-forever",
+  "version": "1.0.0",
+  "description": "Boarding Pass to Forever — wedding invitation with RSVP database",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2"
+  }
+}

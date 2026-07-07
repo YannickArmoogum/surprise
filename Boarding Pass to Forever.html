@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#16120e" />
+<title>Boarding Pass to Forever · Yannick &amp; Reana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16120e;
+    --cream: #efe9df;
+    --tan: #d98c5f;
+    --tan-hi: #e7a67d;
+    --muted: #a89f92;
+    --muted2: #8a8072;
+    --dim: #6f685d;
+    --panel: #1f1913;
+    --line: rgba(239,233,223,.14);
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'Space Grotesk', system-ui, sans-serif;
+    --mono: 'Space Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: #0b0806;
+    font-family: var(--sans);
+    color: var(--cream);
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  a { color: var(--tan); text-decoration: none; }
+  a:hover { color: var(--tan-hi); }
+  input, textarea, button { font-family: inherit; }
+  input:focus, textarea:focus { outline: none; }
+
+  /* ===== Phone stage — fully fluid, fills any viewport ===== */
+  .phone {
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
+    max-width: 440px;
+    overflow: hidden;
+    background: var(--bg);
+    container-type: inline-size;
+    isolation: isolate;
+  }
+  @media (min-width: 480px) and (min-height: 760px) {
+    body { background: radial-gradient(120% 120% at 50% 0%, #1b1510 0%, #0b0806 70%); }
+    .phone {
+      height: min(94dvh, 880px);
+      border-radius: 30px;
+      box-shadow: 0 40px 90px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(239,233,223,.06);
+    }
+  }
+
+  /* fluid type helpers — scale to the phone container, clamped for large phones */
+  .screen {
+    position: absolute; inset: 0; z-index: 10;
+    display: none; flex-direction: column;
+    padding: max(52px, env(safe-area-inset-top)) 30px max(40px, env(safe-area-inset-bottom));
+  }
+  .screen.active { display: flex; animation: cardIn .45s ease both; }
+
+  /* ===== TOP CHROME ===== */
+  .topbar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 50;
+    padding: max(12px, env(safe-area-inset-top)) 16px 0;
+    pointer-events: none; display: none;
+  }
+  .topbar.show { display: block; }
+  .bars { display: flex; gap: 5px; }
+  .bars > div { flex: 1; height: 3px; border-radius: 3px; background: rgba(239,233,223,.22); overflow: hidden; }
+  .bars > div > span { display: block; height: 100%; width: 0%; background: var(--cream); }
+  .wordrow {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 11px; font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: var(--cream);
+  }
+  .wordrow .a { opacity: .85; }
+  .wordrow .b { opacity: .55; }
+
+  /* ===== 0 · COVER ===== */
+  .cover { justify-content: space-between; background: radial-gradient(120% 80% at 50% 0%, #241a12 0%, #16120e 62%); }
+  .cover .top { display: flex; flex-direction: column; align-items: center; gap: 20px; animation: dropIn .7s ease both; }
+  .badge {
+    width: 66px; height: 66px; border-radius: 50%; border: 1.5px solid var(--tan);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-weight: 700; font-size: 19px; letter-spacing: .04em; color: var(--tan); position: relative;
+  }
+  .badge::after { content: ""; position: absolute; inset: -7px; border: 1px solid rgba(217,140,95,.28); border-radius: 50%; }
+  .wordmark { font-family: var(--mono); font-size: 10.5px; letter-spacing: .4em; color: var(--tan); }
+  .cover .mid { text-align: center; }
+  .eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: .28em; color: var(--muted); animation: riseIn .6s .1s both; }
+  .cover h1 {
+    font-family: var(--serif); font-weight: 600; line-height: .98; margin: 16px 0 0; letter-spacing: -.01em;
+    font-size: clamp(46px, 14.4cqw, 60px); animation: riseIn .7s .22s both;
+  }
+  .cover h1 span { font-style: italic; color: var(--tan); }
+  .lede { max-width: 270px; margin: 20px auto 0; font-size: 13.5px; line-height: 1.55; color: #c9c0b3; animation: riseIn .7s .36s both; }
+  .cover .bot { display: flex; flex-direction: column; align-items: center; gap: 6px; animation: riseIn .7s .5s both; }
+  .tap-hint { font-family: var(--mono); font-size: 11px; letter-spacing: .3em; color: var(--cream); animation: pulseHint 1.8s ease-in-out infinite; }
+  .seat-note { font-size: 9px; letter-spacing: .22em; color: var(--dim); font-family: var(--mono); }
+
+  /* ===== 1 · BOARDING PASS ===== */
+  .pass { justify-content: center; padding-left: 22px; padding-right: 22px; background: var(--bg); }
+  .pass .prompt { font-family: var(--mono); font-size: 10px; letter-spacing: .24em; color: var(--muted); margin-bottom: 14px; animation: riseIn .5s .05s both; }
+  .ticket { background: var(--cream); color: var(--bg); border-radius: 14px; overflow: hidden; box-shadow: 0 26px 50px -18px rgba(0,0,0,.6); animation: scaleIn .55s .1s both; }
+  .ticket-head {
+    display: flex; justify-content: space-between; align-items: center; padding: 14px 18px;
+    background: var(--tan); color: var(--bg); font-family: var(--mono); font-size: 10px; letter-spacing: .14em; font-weight: 700;
+  }
+  .ticket-body { padding: 20px 18px 8px; }
+  .t-label { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; color: var(--muted2); }
+  .passenger { font-family: var(--serif); font-weight: 600; font-size: 30px; line-height: 1; margin-top: 3px; }
+  .t-row { display: flex; gap: 24px; }
+  .t-row.r1 { margin-top: 20px; }
+  .t-row.r2 { margin-top: 16px; }
+  .t-cell .t-lab { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; color: var(--muted2); }
+  .t-cell .t-val { font-family: var(--mono); font-weight: 700; margin-top: 2px; }
+  .t-row.r1 .t-val { font-size: 17px; }
+  .t-row.r2 .t-val { font-size: 14px; }
+  .perf { border-top: 1.5px dashed #cbc3b6; margin: 14px 0 0; position: relative; }
+  .perf::before, .perf::after { content: ""; position: absolute; top: -9px; width: 18px; height: 18px; border-radius: 50%; background: var(--bg); }
+  .perf::before { left: -9px; } .perf::after { right: -9px; }
+  .ticket-foot { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 18px; }
+  .dest-dots { font-family: var(--serif); font-weight: 700; font-size: 26px; letter-spacing: .14em; color: var(--tan); line-height: 1; margin-top: 2px; }
+  .barcode { display: flex; gap: 2px; align-items: flex-end; height: 38px; }
+  .barcode i { background: var(--bg); height: 100%; }
+  .withheld { text-align: center; margin-top: 18px; font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: var(--dim); animation: riseIn .6s .5s both; }
+
+  /* ===== 2 · NOW BOARDING ===== */
+  .board { justify-content: center; background: var(--tan); color: var(--bg); overflow: hidden; padding-left: 26px; padding-right: 26px; }
+  .board .ring { position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; border: 1.5px solid rgba(22,18,14,.16); animation: spinSlow 26s linear infinite; }
+  .board .gate { font-family: var(--mono); font-size: 11px; letter-spacing: .24em; animation: dropIn .5s both; }
+  .board h2 { font-family: var(--serif); font-weight: 700; font-size: clamp(52px, 16.4cqw, 68px); line-height: .9; margin: 14px 0 0; letter-spacing: -.02em; animation: riseIn .6s .12s both; }
+  .board p { font-size: 15px; line-height: 1.5; max-width: 280px; margin: 22px 0 0; animation: riseIn .6s .28s both; }
+  .board p strong { font-family: var(--mono); }
+  .marquee { margin-top: 30px; overflow: hidden; white-space: nowrap; border-top: 1px solid rgba(22,18,14,.25); border-bottom: 1px solid rgba(22,18,14,.25); padding: 9px 0; animation: riseIn .6s .4s both; }
+  .marquee span { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .2em; animation: marquee 14s linear infinite; }
+
+  /* ===== 3 · CITIES ===== */
+  .cities { justify-content: center; background: radial-gradient(120% 90% at 50% 100%, #241a12 0%, #16120e 60%); padding-left: 26px; padding-right: 26px; }
+  .cities .head { font-family: var(--mono); font-size: 10px; letter-spacing: .24em; color: var(--muted); animation: dropIn .5s both; }
+  .route { display: flex; align-items: center; justify-content: space-between; margin-top: 26px; animation: riseIn .6s .1s both; }
+  .route .code { font-family: var(--serif); font-weight: 700; font-size: clamp(42px, 13.3cqw, 54px); line-height: .9; }
+  .route .code.dest { color: var(--tan); }
+  .route .sub { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; color: var(--muted); margin-top: 4px; }
+  .route .mid { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 8px; color: var(--tan); }
+  .route .mid .l { height: 1px; flex: 1; background: linear-gradient(90deg, transparent, var(--tan)); }
+  .route .mid .r { height: 1px; flex: 1; background: linear-gradient(90deg, var(--tan), transparent); }
+  .route .plane { font-size: 16px; animation: floaty 3s ease-in-out infinite; }
+  .facts { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; animation: riseIn .6s .26s both; }
+  .fact { border: 1px solid var(--line); border-radius: 11px; padding: 14px; }
+  .fact .k { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; color: var(--muted2); }
+  .fact .v { font-family: var(--mono); font-weight: 700; margin-top: 4px; }
+  .fact .v.lg { font-size: 20px; } .fact .v.sm { font-size: 15px; }
+  .guess { text-align: center; margin-top: 30px; font-family: var(--serif); font-style: italic; font-size: 22px; color: var(--cream); animation: riseIn .6s .4s both; }
+
+  /* ===== 4 · COUNTDOWN ===== */
+  .count { align-items: center; justify-content: center; gap: 14px; padding: 40px; background: radial-gradient(100% 70% at 50% 50%, #241a12 0%, #16120e 70%); }
+  .count .top-l { font-family: var(--mono); font-size: 12px; letter-spacing: .34em; color: var(--tan); }
+  .count .num { font-family: var(--serif); font-weight: 700; font-size: clamp(150px, 54cqw, 220px); line-height: 1; color: var(--cream); }
+  .count .bot-l { font-family: var(--mono); font-size: 11px; letter-spacing: .28em; color: var(--muted); }
+
+  /* ===== 5 · VIDEO ===== */
+  .video { padding: 0; z-index: 20; background: #000; }
+  .video video { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
+  .skip { position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px; z-index: 3; background: rgba(0,0,0,.4); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.35); color: #fff; font-family: var(--mono); font-size: 10px; letter-spacing: .18em; padding: 8px 14px; border-radius: 20px; cursor: pointer; }
+  .unmute { position: absolute; bottom: max(32px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 3; background: var(--tan); color: var(--bg); border: none; font-family: var(--mono); font-weight: 700; font-size: 12px; letter-spacing: .14em; padding: 12px 22px; border-radius: 26px; cursor: pointer; animation: popIn .4s both; display: none; }
+  .unmute.show { display: block; }
+
+  /* ===== 6 · ARRIVED ===== */
+  .arrived { padding: 0; z-index: 20; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--bg); }
+  .hero { position: relative; padding: max(74px, calc(env(safe-area-inset-top) + 40px)) 26px 44px; text-align: center; background: radial-gradient(120% 80% at 50% 0%, #241a12 0%, #16120e 60%); }
+  .hero .eyebrow2 { font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--tan); animation: dropIn .6s both; }
+  .hero h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(54px, 17cqw, 70px); line-height: .92; margin: 14px 0 0; letter-spacing: -.02em; animation: popIn .7s .1s both; }
+  .hero .date { font-family: var(--mono); font-size: 13px; letter-spacing: .16em; color: var(--cream); margin-top: 14px; animation: riseIn .6s .3s both; }
+  .hero p { max-width: 290px; margin: 18px auto 0; font-size: 14px; line-height: 1.55; color: #c9c0b3; animation: riseIn .6s .42s both; }
+  .cta { display: flex; gap: 10px; justify-content: center; margin-top: 26px; flex-wrap: wrap; animation: riseIn .6s .54s both; }
+  .btn-fill { background: var(--tan); color: var(--bg); font-family: var(--mono); font-weight: 700; font-size: 11px; letter-spacing: .1em; padding: 13px 18px; border-radius: 26px; }
+  .btn-line { border: 1px solid rgba(239,233,223,.4); color: var(--cream); font-family: var(--mono); font-weight: 700; font-size: 11px; letter-spacing: .1em; padding: 13px 18px; border-radius: 26px; }
+  .section-lab { font-family: var(--mono); font-size: 10px; letter-spacing: .24em; color: var(--muted); margin-bottom: 16px; }
+  .itin { padding: 8px 26px 30px; }
+  .itin-row { display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid rgba(239,233,223,.12); }
+  .itin-row:last-child { border-bottom: 1px solid rgba(239,233,223,.12); }
+  .itin-row .d { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--tan); min-width: 56px; }
+  .itin-row .t { font-family: var(--serif); font-size: 22px; font-weight: 600; line-height: 1; }
+  .itin-row .s { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .rsvp { padding: 6px 26px 44px; }
+  .rsvp form { display: flex; flex-direction: column; gap: 12px; }
+  .rsvp input, .rsvp textarea { background: var(--panel); border: 1px solid rgba(239,233,223,.16); border-radius: 10px; padding: 14px; color: var(--cream); font-size: 14px; width: 100%; }
+  .rsvp textarea { resize: none; }
+  .seg { display: flex; gap: 10px; }
+  .seg button { flex: 1; font-family: var(--mono); font-weight: 700; font-size: 11px; letter-spacing: .06em; padding: 13px 8px; border-radius: 10px; cursor: pointer; transition: .15s; background: transparent; color: var(--cream); border: 1px solid rgba(239,233,223,.28); }
+  .seg button.on-tan { background: var(--tan); color: var(--bg); border-color: var(--tan); }
+  .seg button.on-cream { background: var(--cream); color: var(--bg); border-color: var(--cream); }
+  .plus-lab { font-family: var(--mono); font-size: 9px; letter-spacing: .16em; color: var(--muted2); margin-bottom: 9px; }
+  .submit { background: var(--tan); color: var(--bg); border: none; font-family: var(--mono); font-weight: 700; font-size: 12px; letter-spacing: .14em; padding: 15px; border-radius: 26px; cursor: pointer; margin-top: 4px; }
+  .submit:disabled { opacity: .6; cursor: default; }
+  .rsvp-msg { text-align: center; font-size: 12.5px; margin-top: 2px; min-height: 16px; }
+  .rsvp-msg.err { color: #f0a58c; }
+  .rsvp-done { text-align: center; border: 1px solid rgba(217,140,95,.4); border-radius: 14px; padding: 32px 22px; animation: popIn .5s both; }
+  .rsvp-done .glass { font-size: 34px; }
+  .rsvp-done .h { font-family: var(--serif); font-size: 30px; font-weight: 600; margin-top: 8px; }
+  .rsvp-done p { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  .foot { padding: 24px 26px max(40px, calc(env(safe-area-inset-bottom) + 20px)); border-top: 1px solid rgba(239,233,223,.1); text-align: center; }
+  .foot .fl { font-family: var(--mono); font-size: 10px; letter-spacing: .24em; color: var(--dim); }
+  .foot a { display: inline-block; margin-top: 12px; font-family: var(--mono); font-size: 10px; letter-spacing: .18em; }
+
+  /* ===== TAP LAYER ===== */
+  .tap-layer { position: absolute; inset: 0; z-index: 40; cursor: pointer; display: none; }
+  .tap-layer.show { display: block; }
+
+  /* ===== animations ===== */
+  @keyframes cardIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes dropIn { from { opacity: 0; transform: translateY(-18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(.7); } 60% { opacity: 1; transform: scale(1.06); } 100% { transform: scale(1); } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
+  @keyframes pulseHint { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes spinSlow { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- TOP CHROME -->
+  <div class="topbar" id="topbar">
+    <div class="bars">
+      <div><span id="bar0"></span></div>
+      <div><span id="bar1"></span></div>
+      <div><span id="bar2"></span></div>
+      <div><span id="bar3"></span></div>
+    </div>
+    <div class="wordrow">
+      <span class="a">✦ Y&amp;R AIRWAYS</span>
+      <span class="b flight-code">YR·2003</span>
+    </div>
+  </div>
+
+  <!-- 0 · COVER -->
+  <section class="screen cover" data-step="0">
+    <div class="top">
+      <div class="badge">YR</div>
+      <div class="wordmark">Y &nbsp;&amp;&nbsp; R &nbsp; A I R W A Y S</div>
+    </div>
+    <div class="mid">
+      <div class="eyebrow">FLIGHT <span class="flight-code">YR·2003</span> · NOW BOARDING</div>
+      <h1>Boarding Pass<br><span>to&nbsp;Forever</span></h1>
+      <p class="lede">Yannick &amp; Reana request the pleasure of your company — somewhere near 35,000 feet.</p>
+    </div>
+    <div class="bot">
+      <div class="tap-hint">TAP TO CHECK IN →</div>
+      <div class="seat-note">SEAT: BESIDE US · GATE 20</div>
+    </div>
+  </section>
+
+  <!-- 1 · BOARDING PASS -->
+  <section class="screen pass" data-step="1">
+    <div class="prompt">YOUR TICKET IS READY —</div>
+    <div class="ticket">
+      <div class="ticket-head"><span>BOARDING PASS</span><span>Y&amp;R AIRWAYS</span></div>
+      <div class="ticket-body">
+        <div class="t-label">PASSENGER</div>
+        <div class="passenger">Our Favourite People</div>
+        <div class="t-row r1">
+          <div class="t-cell"><div class="t-lab">FLIGHT</div><div class="t-val flight-code">YR·20-03</div></div>
+          <div class="t-cell"><div class="t-lab">DATE</div><div class="t-val">20 MAR 2027</div></div>
+          <div class="t-cell"><div class="t-lab">GATE</div><div class="t-val">20</div></div>
+        </div>
+        <div class="t-row r2">
+          <div class="t-cell"><div class="t-lab">CLASS</div><div class="t-val">FIRST · FOREVER</div></div>
+          <div class="t-cell"><div class="t-lab">SEAT</div><div class="t-val">BESIDE US</div></div>
+        </div>
+      </div>
+      <div class="perf"></div>
+      <div class="ticket-foot">
+        <div>
+          <div class="t-label">DESTINATION</div>
+          <div class="dest-dots">• • • • •</div>
+        </div>
+        <div class="barcode" id="barcode"></div>
+      </div>
+    </div>
+    <div class="withheld">DESTINATION WITHHELD — FOR NOW</div>
+  </section>
+
+  <!-- 2 · NOW BOARDING -->
+  <section class="screen board" data-step="2">
+    <div class="ring"></div>
+    <div class="gate">● GATE 20 · FINAL CALL</div>
+    <h2>Now<br>Boarding</h2>
+    <p>Flight <strong class="flight-code">YR·2003</strong> to <strong style="letter-spacing:.1em;">✱ ✱ ✱ ✱ ✱</strong> is boarding. All rows, all hearts — please have your bags and your best outfits ready.</p>
+    <div class="marquee"><span>FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · FINAL CALL · SAVE THE DATE · </span></div>
+  </section>
+
+  <!-- 3 · CITIES -->
+  <section class="screen cities" data-step="3">
+    <div class="head">DEPARTURE&nbsp;&nbsp;/&nbsp;&nbsp;ARRIVAL</div>
+    <div class="route">
+      <div style="text-align:left;">
+        <div class="code">HOM</div>
+        <div class="sub">HOME · YOU</div>
+      </div>
+      <div class="mid"><div class="l"></div><span class="plane">✈</span><div class="r"></div></div>
+      <div style="text-align:right;">
+        <div class="code dest">???</div>
+        <div class="sub">CLASSIFIED</div>
+      </div>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="k">TIMEZONE</div><div class="v lg">GMT +4</div></div>
+      <div class="fact"><div class="k">FORECAST</div><div class="v lg">28°C ☀</div></div>
+      <div class="fact"><div class="k">TERRAIN</div><div class="v sm">Indian Ocean</div></div>
+      <div class="fact"><div class="k">PACK</div><div class="v sm">Leave the coats</div></div>
+    </div>
+    <p class="guess">Any guesses where we're taking you?</p>
+  </section>
+
+  <!-- 4 · COUNTDOWN -->
+  <section class="screen count" data-step="4">
+    <div class="top-l">CLEARED FOR TAKEOFF</div>
+    <div class="num" id="countNum">3</div>
+    <div class="bot-l">FASTEN SEATBELTS</div>
+  </section>
+
+  <!-- 5 · VIDEO -->
+  <section class="screen video" data-step="5">
+    <video id="weddingVideo" src="uploads/wedding_video_lower_res.mp4" playsinline preload="auto"></video>
+    <button class="skip" id="skipBtn">SKIP →</button>
+    <button class="unmute" id="unmuteBtn">🔊 TAP FOR SOUND</button>
+  </section>
+
+  <!-- 6 · ARRIVED -->
+  <section class="screen arrived" data-step="6">
+    <div class="hero">
+      <div class="eyebrow2">✦ WELCOME TO YOUR DESTINATION</div>
+      <h1>Mauritius</h1>
+      <div class="date">20 · 03 · 2027</div>
+      <p>Yannick &amp; Reana are getting married on the island — and Flight <span class="flight-code">YR·2003</span> isn't complete without you on board.</p>
+      <div class="cta">
+        <a class="btn-fill" id="icsLink" download="YR2003-Mauritius.ics" href="#">＋ ADD TO CALENDAR</a>
+        <a class="btn-line" href="#rsvp">RSVP</a>
+      </div>
+    </div>
+
+    <div class="itin">
+      <div class="section-lab">IN-FLIGHT ITINERARY</div>
+      <div class="itin-row"><div class="d">18 MAR</div><div><div class="t">Arrivals &amp; Sundowners</div><div class="s">Land, unwind, first drinks by the water.</div></div></div>
+      <div class="itin-row"><div class="d">20 MAR</div><div><div class="t">The Wedding · 16:00</div><div class="s">Beachside ceremony, then dinner &amp; dancing.</div></div></div>
+      <div class="itin-row"><div class="d">21 MAR</div><div><div class="t">Recovery Brunch</div><div class="s">A slow, happy landing before you fly home.</div></div></div>
+    </div>
+
+    <div class="rsvp" id="rsvp">
+      <div class="section-lab">CONFIRM YOUR SEAT</div>
+      <div id="rsvpDone" class="rsvp-done" style="display:none;">
+        <div class="glass">🥂</div>
+        <div class="h">You're checked in!</div>
+        <p>We can't wait to see you in Mauritius. Details for Flight <span class="flight-code">YR·2003</span> are on their way.</p>
+      </div>
+      <form id="rsvpForm">
+        <input id="rsvpName" placeholder="Full name" autocomplete="name" />
+        <div class="seg">
+          <button type="button" data-att="yes">Yes, I'll fly ✈</button>
+          <button type="button" data-att="no">Can't make it</button>
+        </div>
+        <div>
+          <div class="plus-lab">BRINGING A PLUS ONE?</div>
+          <div class="seg">
+            <button type="button" data-plus="solo">Just me</button>
+            <button type="button" data-plus="plus">Me + 1 ✦</button>
+          </div>
+        </div>
+        <textarea id="rsvpMsg" placeholder="A note for the couple (optional)" rows="3"></textarea>
+        <button type="submit" class="submit" id="rsvpSubmit">CONFIRM MY SEAT</button>
+        <div class="rsvp-msg" id="rsvpErr"></div>
+      </form>
+    </div>
+
+    <div class="foot">
+      <div class="fl">Y&amp;R AIRWAYS · <span class="flight-code">YR·2003</span> · MAURITIUS 2027</div>
+      <a href="#" id="replayLink">↺ REPLAY BOARDING</a>
+    </div>
+  </section>
+
+  <!-- TAP NAV -->
+  <div class="tap-layer" id="tapLayer"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var FLIGHT_CODE = 'YR·2003';
+  var PACE = 1; // Relaxed 1.4 · Standard 1 · Snappy 0.7
+
+  var phone = document.getElementById('phone');
+  var topbar = document.getElementById('topbar');
+  var tapLayer = document.getElementById('tapLayer');
+  var screens = {};
+  Array.prototype.forEach.call(document.querySelectorAll('.screen'), function (el) {
+    screens[el.getAttribute('data-step')] = el;
+  });
+  var bars = [0,1,2,3].map(function (i) { return document.getElementById('bar' + i); });
+  var countNum = document.getElementById('countNum');
+  var video = document.getElementById('weddingVideo');
+  var unmuteBtn = document.getElementById('unmuteBtn');
+
+  // fill flight code everywhere
+  Array.prototype.forEach.call(document.querySelectorAll('.flight-code'), function (el) { el.textContent = FLIGHT_CODE; });
+
+  // build barcode (varied widths, matching the mock)
+  (function () {
+    var widths = [2,1,3,1,2,1,4,1,2,2,1,3];
+    var bc = document.getElementById('barcode');
+    widths.forEach(function (w) { var i = document.createElement('i'); i.style.width = w + 'px'; bc.appendChild(i); });
+  })();
+
+  var state = { step: 0, count: 3, attending: null, plusOne: null, done: false };
+  var timer = null, cdTimer = null;
+
+  function clearTimers() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
+  }
+
+  function render() {
+    Object.keys(screens).forEach(function (k) {
+      screens[k].classList.toggle('active', +k === state.step);
+    });
+    topbar.classList.toggle('show', state.step >= 1 && state.step <= 4);
+    tapLayer.classList.toggle('show', state.step <= 4);
+    countNum.textContent = state.count;
+    updateBars();
+  }
+
+  function updateBars() {
+    var active = state.step - 1;
+    bars.forEach(function (b, i) {
+      if (!b) return;
+      if (b.getAnimations) b.getAnimations().forEach(function (a) { a.cancel(); });
+      b.style.width = i < active ? '100%' : '0%';
+    });
+  }
+
+  function animateBar(i, dur) {
+    var b = bars[i];
+    if (!b || !b.animate) return;
+    if (b.getAnimations) b.getAnimations().forEach(function (a) { a.cancel(); });
+    b.animate([{ width: '0%' }, { width: '100%' }], { duration: dur, easing: 'linear', fill: 'forwards' });
+  }
+
+  function popNum() {
+    if (!countNum.animate) return;
+    countNum.animate([
+      { transform: 'scale(.4)', opacity: 0 },
+      { transform: 'scale(1.12)', opacity: 1, offset: .6 },
+      { transform: 'scale(1)', opacity: 1 }
+    ], { duration: 550, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  }
+
+  function go(step) { state.step = step; render(); onEnter(step); }
+
+  function onEnter(step) {
+    clearTimers();
+    updateBars();
+    var durs = { 1: 9500, 2: 7500, 3: 8000 };
+    if (durs[step]) {
+      var d = durs[step] * PACE;
+      animateBar(step - 1, d);
+      timer = setTimeout(next, d);
+    } else if (step === 4) {
+      state.count = 3; render(); popNum();
+      animateBar(3, 3300 * PACE);
+      cdTimer = setInterval(function () {
+        if (state.count <= 1) {
+          clearInterval(cdTimer); cdTimer = null;
+          state.count = 0; render();
+          setTimeout(function () { go(5); }, 350);
+          return;
+        }
+        state.count -= 1; render(); popNum();
+      }, 1000 * PACE);
+    } else if (step === 5) {
+      playVideo();
+    }
+  }
+
+  function next() {
+    if (state.step >= 6 || state.step === 4 || state.step === 5) return;
+    go(state.step + 1);
+  }
+  function prev() {
+    if (state.step <= 0 || state.step >= 5) return;
+    go(state.step - 1);
+  }
+
+  tapLayer.addEventListener('click', function (e) {
+    var s = state.step;
+    if (s > 4) return;
+    if (s === 0) { next(); return; }
+    var rect = tapLayer.getBoundingClientRect();
+    var x = e.clientX - rect.left;
+    if (x < rect.width * 0.3) prev(); else next();
+  });
+
+  // ---- video ----
+  function playVideo() {
+    if (!video) { go(6); return; }
+    try { video.currentTime = 0; } catch (err) {}
+    video.muted = false;
+    var p = video.play();
+    if (p && p.catch) {
+      p.then(function () { unmuteBtn.classList.remove('show'); }).catch(function () {
+        video.muted = true;
+        unmuteBtn.classList.add('show');
+        video.play().catch(function () {});
+      });
+    }
+  }
+  unmuteBtn.addEventListener('click', function () {
+    video.muted = false; video.play().catch(function () {});
+    unmuteBtn.classList.remove('show');
+  });
+  video.addEventListener('ended', function () { go(6); });
+  document.getElementById('skipBtn').addEventListener('click', function () {
+    try { video.pause(); } catch (e) {}
+    go(6);
+  });
+
+  // ---- calendar ----
+  (function () {
+    var lines = [
+      'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Y&R Airways//Wedding//EN',
+      'BEGIN:VEVENT','UID:yr2003-mauritius@wedding','DTSTAMP:20270320T060000Z',
+      'DTSTART:20270320T120000Z','DTEND:20270320T220000Z',
+      'SUMMARY:Yannick & Reana Wedding — Flight YR2003',
+      'LOCATION:Mauritius','DESCRIPTION:Boarding Pass to Forever. See you on the island!',
+      'END:VEVENT','END:VCALENDAR'
+    ];
+    document.getElementById('icsLink').href =
+      'data:text/calendar;charset=utf-8,' + encodeURIComponent(lines.join('\r\n'));
+  })();
+
+  // ---- RSVP ----
+  var attBtns = document.querySelectorAll('.seg button[data-att]');
+  var plusBtns = document.querySelectorAll('.seg button[data-plus]');
+  attBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.attending = b.getAttribute('data-att');
+      attBtns.forEach(function (x) {
+        x.classList.remove('on-tan', 'on-cream');
+        if (x === b) x.classList.add(b.getAttribute('data-att') === 'yes' ? 'on-tan' : 'on-cream');
+      });
+    });
+  });
+  plusBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      state.plusOne = b.getAttribute('data-plus') === 'plus';
+      plusBtns.forEach(function (x) { x.classList.toggle('on-tan', x === b); });
+    });
+  });
+
+  var form = document.getElementById('rsvpForm');
+  var errEl = document.getElementById('rsvpErr');
+  var submitBtn = document.getElementById('rsvpSubmit');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('rsvpName').value.trim();
+    if (!name) { errEl.textContent = 'Please enter your name.'; errEl.className = 'rsvp-msg err'; return; }
+    var payload = {
+      name: name,
+      attending: state.attending === 'no' ? 'no' : 'yes',
+      guests: state.plusOne ? 2 : 1,
+      message: document.getElementById('rsvpMsg').value.trim(),
+      meal: '', email: ''
+    };
+    submitBtn.disabled = true;
+    errEl.textContent = 'Confirming your seat…'; errEl.className = 'rsvp-msg';
+    fetch('/api/rsvp', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.d && res.d.error || 'Something went wrong.');
+        state.done = true;
+        form.style.display = 'none';
+        document.getElementById('rsvpDone').style.display = 'block';
+      })
+      .catch(function (err) {
+        submitBtn.disabled = false;
+        errEl.textContent = err.message || 'Could not submit. Please try again.';
+        errEl.className = 'rsvp-msg err';
+      });
+  });
+
+  document.getElementById('replayLink').addEventListener('click', function (e) {
+    e.preventDefault();
+    clearTimers();
+    state.count = 3;
+    go(0);
+    phone.scrollTop = 0;
+  });
+
+  // start
+  render();
+})();
+</script>
+</body>
+</html>
