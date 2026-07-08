@@ -445,16 +445,54 @@
 
   // ── Where RSVP submissions are sent ──────────────────────────────────────
   // Locally (npm start) they go to the bundled Node + SQLite server so you keep
-  // the database + /admin page. On the published GitHub Pages site there is no
-  // server, so they go to Formspree instead.
+  // the /admin page for testing. On the published GitHub Pages site there is
+  // no server, so the browser inserts straight into a free Supabase
+  // (hosted PostgreSQL) table via its REST API.
   //
-  // 1. Create a free form at https://formspree.io  →  copy its endpoint,
-  //    which looks like  https://formspree.io/f/abcdwxyz
-  // 2. Paste that full URL below, replacing YOUR_FORM_ID.
-  var RSVP_LOCAL  = '/api/rsvp';
-  var RSVP_REMOTE = 'https://formspree.io/f/YOUR_FORM_ID';
+  // Setup (once): create a project at https://supabase.com, run the SQL in
+  // supabase-setup.sql, then paste your project's URL + anon public key below
+  // (Dashboard → Settings → API).
+  var SUPABASE_URL = 'https://vxerkuhadbizmaqmisux.supabase.co';
+  var SUPABASE_ANON_KEY = 'sb_publishable_Z2-98xISESzOY-YghJSLKA_C_xQzrv5';
   var IS_LOCAL = ['localhost', '127.0.0.1', ''].indexOf(location.hostname) !== -1;
-  var RSVP_ENDPOINT = IS_LOCAL ? RSVP_LOCAL : RSVP_REMOTE;
+
+  function sendRsvp(payload) {
+    if (IS_LOCAL) {
+      return fetch('/api/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (r) {
+        return r.json().then(
+          function (d) { return { ok: r.ok, error: d && d.error }; },
+          function () { return { ok: r.ok }; }
+        );
+      });
+    }
+    // Supabase PostgREST insert into public.rsvps
+    return fetch(SUPABASE_URL + '/rest/v1/rsvps', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        name: payload.name,
+        attending: payload.attending,
+        guests: payload.guests,
+        plus_one_name: payload.plusOneName || null,
+        message: payload.message || null,
+        lang: payload.lang || null
+      })
+    }).then(function (r) {
+      if (r.ok) return { ok: true };
+      return r.text().then(function (txt) {
+        return { ok: false, error: txt && txt.slice(0, 200) };
+      });
+    });
+  }
 
   // ===== i18n dictionaries =====
   var I18N = {
@@ -752,11 +790,9 @@
     };
     submitBtn.disabled = true;
     errEl.textContent = t('confirming'); errEl.className = 'rsvp-msg';
-    fetch(RSVP_ENDPOINT, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(payload)
-    }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }, function () { return { ok: r.ok, d: {} }; }); })
+    sendRsvp(payload)
       .then(function (res) {
-        if (!res.ok) throw new Error(res.d && res.d.error || t('genericErr'));
+        if (!res.ok) throw new Error(res.error || t('genericErr'));
         state.done = true;
         form.style.display = 'none';
         document.getElementById('rsvpDone').style.display = 'block';

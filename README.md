@@ -51,8 +51,25 @@ ADMIN_USER=yannick ADMIN_PASS=some-secret PORT=3000 npm start
 
 ## Where the data lives
 
-Every RSVP is stored in **`rsvps.db`** (SQLite). The form captures name, attending
-(yes/no), party size (Just me / Me + 1), and an optional message.
+The form captures name, attending (yes/no), party size (Just me / Me + 1), the +1's
+name, and an optional message.
+
+**Published site (GitHub Pages) → Supabase (free hosted PostgreSQL).**
+The browser inserts each RSVP straight into your Supabase table — no server needed.
+One-time setup:
+
+1. Create a free project at https://supabase.com.
+2. Dashboard → SQL Editor → paste and run `supabase-setup.sql` (creates the `rsvps`
+   table, locked down so the public key can only insert — never read the guest list).
+3. Dashboard → Settings → API → copy the **Project URL** and **anon public** key.
+4. Paste both into `index.html` (`SUPABASE_URL` / `SUPABASE_ANON_KEY`, near the top
+   of the `<script>`).
+
+To see who RSVP'd: Supabase Dashboard → **Table Editor** → `rsvps` — a spreadsheet
+view with CSV export built in.
+
+**Local testing (`npm start`) → SQLite.** RSVPs go to **`rsvps.db`** via the bundled
+Node server so you can test without touching real data:
 
 - View them in the admin table at `/admin`.
 - Download everything as a spreadsheet via **Download CSV** (`/admin/export.csv`).
